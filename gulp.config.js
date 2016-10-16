@@ -1,21 +1,21 @@
-module.exports = function() {
-  var client = './src/client';
-  var relativeClient = 'src/client';
-  var server = './src/server';
-  var relativeServer = 'src/server';
-  var clientApp = client + '/app';
-  var relativeClientApp = relativeClient + '/app';
-  var cssDir = client + '/styles'
-  var root = './';
-  var temp = './.tmp';
-  var wiredep = require('wiredep');
-  var bowerFiles = wiredep({ devDependencies: true })['js'];
-  var bower = {
+module.exports = () => {
+  const client = './src/client';
+  const relativeClient = 'src/client';
+  const server = './src/server';
+  const relativeServer = 'src/server';
+  const clientApp = client + '/app';
+  const relativeClientApp = relativeClient + '/app';
+  const cssDir = client + '/styles'
+  const root = './';
+  const temp = './.tmp';
+  const wiredep = require('wiredep');
+  const bowerFiles = wiredep({ devDependencies: true })['js'];
+  const bower = {
     json: require('./bower.json'),
     directory: relativeClient + '/bower_components',
     ignorePath: '../..'
   };
-  var ngdocs = {
+  const ngdocs = {
       dest: relativeClient + '/docs/',
       sections: {
           client: {
@@ -32,9 +32,9 @@ module.exports = function() {
           html5Mode: false
       }
   };
-  var nodeModules = 'node_modules';
+  const nodeModules = 'node_modules';
 
-  var config = {
+  const config = {
     /**
      * File paths
      */
@@ -112,8 +112,8 @@ module.exports = function() {
   /**
    * wiredep and bower settings
    */
-  config.getWiredepDefaultOptions = function() {
-    var options = {
+  config.getWiredepDefaultOptions = () => {
+    const options = {
       bowerJson: config.bower.json,
       directory: config.bower.directory,
       ignorePath: config.bower.ignorePath

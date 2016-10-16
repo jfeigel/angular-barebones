@@ -1,15 +1,15 @@
-var args = require('yargs').argv;
-var config = require('./gulp.config')();
-var del = require('del');
-var glob = require('glob');
-var gulp = require('gulp');
-var _ = require('lodash');
-var path = require('path');
-var plugins = require('gulp-load-plugins')({
+const args = require('yargs').argv;
+const config = require('./gulp.config')();
+const del = require('del');
+const glob = require('glob');
+const gulp = require('gulp');
+const _ = require('lodash');
+const path = require('path');
+const plugins = require('gulp-load-plugins')({
   lazy: true
 });
 
-var colors = plugins.util.colors;
+const colors = plugins.util.colors;
 
 /**
  * List the available gulp tasks
@@ -23,7 +23,7 @@ gulp.task('start', ['inject', 'start-server']);
  * Watch all files to be compiled, run their respective compilation tasks,
  * and livereload.
  */
-gulp.task('watch', function() {
+gulp.task('watch', () => {
   plugins.livereload.listen();
 
   gulp.watch([config.sass], ['inject', 'styles']);
@@ -35,7 +35,7 @@ gulp.task('watch', function() {
  * Compile sass to css
  * @return {Stream}
  */
-gulp.task('styles', ['clean-styles'], function() {
+gulp.task('styles', ['clean-styles'], () => {
   log('Compiling SASS --> CSS');
 
   return gulp
@@ -53,7 +53,7 @@ gulp.task('styles', ['clean-styles'], function() {
  * Copy fonts
  * @return {Stream}
  */
-gulp.task('fonts', ['clean-fonts'], function() {
+gulp.task('fonts', ['clean-fonts'], () => {
   log('Copying fonts');
 
   return gulp
@@ -65,7 +65,7 @@ gulp.task('fonts', ['clean-fonts'], function() {
  * Compress images
  * @return {Stream}
  */
-gulp.task('images', ['clean-images'], function() {
+gulp.task('images', ['clean-images'], () => {
   log('Compressing and copying images');
 
   return gulp
@@ -80,7 +80,7 @@ gulp.task('images', ['clean-images'], function() {
  * Create $templateCache from the html templates
  * @return {Stream}
  */
-gulp.task('templatecache', ['clean-code'], function() {
+gulp.task('templatecache', ['clean-code'], () => {
   log('Creating an AngularJS $templateCache');
 
   return gulp
@@ -97,9 +97,9 @@ gulp.task('templatecache', ['clean-code'], function() {
     .pipe(gulp.dest(config.clientApp));
 });
 
-gulp.task('templates', ['templatecache'], function() {
+gulp.task('templates', ['templatecache'], () => {
   log('Wiring the AngularJS templates into the html');
-  var templateCache = config.clientApp + '/' + config.templateCache.file;
+  const templateCache = config.clientApp + '/' + config.templateCache.file;
 
   return gulp
     .src(config.index)
@@ -114,14 +114,14 @@ gulp.task('templates', ['templatecache'], function() {
  * Wire-up the bower dependencies
  * @return {Stream}
  */
-gulp.task('wiredep', function() {
+gulp.task('wiredep', () => {
   log('Wiring the bower dependencies into the html');
 
-  var wiredep = require('wiredep').stream;
-  var options = config.getWiredepDefaultOptions();
+  const wiredep = require('wiredep').stream;
+  const options = config.getWiredepDefaultOptions();
 
   // Only include stubs if flag is enabled
-  var js = args.stubs ? [].concat(config.js, config.stubsjs) : config.js;
+  const js = args.stubs ? [].concat(config.js, config.stubsjs) : config.js;
 
   return gulp
     .src(config.index)
@@ -134,7 +134,7 @@ gulp.task('wiredep', function() {
     .pipe(plugins.livereload());
 });
 
-gulp.task('inject', ['wiredep', 'styles', 'templates'], function() {
+gulp.task('inject', ['wiredep', 'styles', 'templates'], () => {
   log('Wire the css into the html, after files are ready');
 
   return gulp
@@ -150,7 +150,7 @@ gulp.task('inject', ['wiredep', 'styles', 'templates'], function() {
  * Compile the documentation
  * @return {Stream}
  */
-gulp.task('ngdocs', function() {
+gulp.task('ngdocs', () => {
   log('Compiling documentation');
 
   plugins.ngdocs.sections(config.ngdocs.sections)
@@ -162,10 +162,10 @@ gulp.task('ngdocs', function() {
  * Publish the documentation to the `gh-pages` branch
  * @return {Stream}
  */
-gulp.task('gh-pages', [], function() {
+gulp.task('gh-pages', [], () => {
   log('Pushing docs to gh-pages');
 
-  var ghpages = require('gh-pages');
+  const ghpages = require('gh-pages');
 
   ghpages.publish(config.ngdocs.dest);
 });
@@ -175,18 +175,18 @@ gulp.task('gh-pages', [], function() {
  * and inject them into the new index.html
  * @return {Stream}
  */
-gulp.task('optimize', ['inject', 'test'], function() {
+gulp.task('optimize', ['inject', 'test'], () => {
   log('Optimizing the js, css, and html');
 
-  var assets = plugins.useref.assets({
+  const assets = plugins.useref.assets({
     searchPath: './'
   });
   // Filters are named for the gulp-useref path
-  var cssFilter = plugins.filter('**/*.css');
-  var jsAppFilter = plugins.filter('**/' + config.optimized.app);
-  var jslibFilter = plugins.filter('**/' + config.optimized.lib);
+  const cssFilter = plugins.filter('**/*.css');
+  const jsAppFilter = plugins.filter('**/' + config.optimized.app);
+  const jslibFilter = plugins.filter('**/' + config.optimized.lib);
 
-  var templateCache = config.temp + config.templateCache.file;
+  const templateCache = config.temp + config.templateCache.file;
 
   return gulp
     .src(config.index)
@@ -223,8 +223,8 @@ gulp.task('optimize', ['inject', 'test'], function() {
  * Remove all files from the build, temp, and reports folders
  * @param  {Function} done - callback when complete
  */
-gulp.task('clean', function(done) {
-  var delconfig = [].concat(config.build, config.temp, config.report);
+gulp.task('clean', (done) => {
+  const delconfig = [].concat(config.build, config.temp, config.report);
   log('Cleaning: ' + plugins.util.colors.blue(delconfig));
   del(delconfig, done);
 });
@@ -233,7 +233,7 @@ gulp.task('clean', function(done) {
  * Remove all fonts from the build folder
  * @param  {Function} done - callback when complete
  */
-gulp.task('clean-fonts', function(done) {
+gulp.task('clean-fonts', (done) => {
   clean(config.build + '/fonts/**/*.*', done);
 });
 
@@ -241,7 +241,7 @@ gulp.task('clean-fonts', function(done) {
  * Remove all images from the build folder
  * @param  {Function} done - callback when complete
  */
-gulp.task('clean-images', function(done) {
+gulp.task('clean-images', (done) => {
   clean(config.build + '/images/**/*.*', done);
 });
 
@@ -249,8 +249,8 @@ gulp.task('clean-images', function(done) {
  * Remove all styles from the build and temp folders
  * @param  {Function} done - callback when complete
  */
-gulp.task('clean-styles', function(done) {
-  var files = [].concat(
+gulp.task('clean-styles', (done) => {
+  const files = [].concat(
     config.temp + '/**/*.css',
     config.build + '/styles/**/*.css'
   );
@@ -261,8 +261,8 @@ gulp.task('clean-styles', function(done) {
  * Remove all js and html from the build and temp folders
  * @param  {Function} done - callback when complete
  */
-gulp.task('clean-code', function(done) {
-  var files = [].concat(
+gulp.task('clean-code', (done) => {
+  const files = [].concat(
     config.temp + '/**/*.js',
     config.build + '/js/**/*.js',
     config.build + '/**/*.html'
@@ -270,16 +270,19 @@ gulp.task('clean-code', function(done) {
   clean(files, done);
 });
 
-gulp.task('start-server', function() {
+gulp.task('start-server', () => {
   plugins.nodemon({
       script: `${config.server}/app.js`,
-      ext: 'js html',
       env: {
         'NODE_ENV': 'development'
-      }
+      },
+      watch: [
+        'src/server/'
+      ]
     })
     .on('start', ['ngdocs', 'watch'])
-    .on('restart', function() {
+    .on('restart', () => {
+      log('nodemon restarted');
       plugins.livereload();
     });
 });
@@ -333,7 +336,7 @@ function orderSrc(src, order) {
  * @return {String}      Difference in bytes, formatted
  */
 function bytediffFormatter(data) {
-  var difference = (data.savings > 0) ? ' smaller.' : ' larger.';
+  const difference = (data.savings > 0) ? ' smaller.' : ' larger.';
   return data.fileName + ' went from ' +
     (data.startSize / 1000).toFixed(2) + ' kB to ' +
     (data.endSize / 1000).toFixed(2) + ' kB and is ' +
@@ -355,8 +358,8 @@ function formatPercent(num, precision) {
  * @return {String}           Formatted file header
  */
 function getHeader() {
-  var pkg = require('./package.json');
-  var template = ['/**',
+  const pkg = require('./package.json');
+  const template = ['/**',
     ' * <%= pkg.name %> - <%= pkg.description %>',
     ' * @authors <%= pkg.authors %>',
     ' * @version v<%= pkg.version %>',
@@ -376,7 +379,7 @@ function getHeader() {
  */
 function log(msg) {
   if (typeof(msg) === 'object') {
-    for (var item in msg) {
+    for (const item in msg) {
       if (msg.hasOwnProperty(item)) {
         plugins.util.log(plugins.util.colors.blue(msg[item]));
       }
@@ -390,8 +393,8 @@ function log(msg) {
  * Show OS level notification using node-notifier
  */
 function notify(options) {
-  var notifier = require('node-notifier');
-  var notifyOptions = {
+  const notifier = require('node-notifier');
+  const notifyOptions = {
     sound: 'Bottle',
     contentImage: path.join(__dirname, 'gulp.png'),
     icon: path.join(__dirname, 'gulp.png')

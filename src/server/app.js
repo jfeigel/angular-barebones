@@ -1,56 +1,54 @@
 /*jshint node:true*/
-'use strict';
+"use strict";
 
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var port = process.env.PORT || 8001;
-var four0four = require('./utils/404')();
+const Koa = require("koa");
+const app = new Koa();
 
-var environment = process.env.NODE_ENV;
+const serve = require("koa-static-folder");
+const bodyParser = require("koa-bodyparser");
 
-app.use(favicon(__dirname + '/favicon.ico'));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(logger('dev'));
+const port = process.env.PORT || 8001;
+const environment = process.env.NODE_ENV;
 
-app.use('/api', require('./routes'));
+app.use(bodyParser());
 
-console.log('About to crank up node');
-console.log('PORT=' + port);
-console.log('NODE_ENV=' + environment);
+app.use(function* appUse(next) {
+	try {
+		yield next;
+	} catch (err) {
+		if (this.state.api === true) {
+			// if this was an API request, send the error back in a plain response
+			this.app.emit("error", err, this);
+			this.body = {error: true, message: String(err)};
+		} else {
+			// this wasn"t an API request, show the error page
+			this.app.emit("error", err, this);
+			yield this.render("error", {
+				dump: err
+			});
+		}
+	}
+});
+
+console.log(`PORT=${port}`);
+console.log(`NODE_ENV=${environment}`);
 
 switch (environment) {
-  case 'build':
-    console.log('** BUILD **');
-    app.use(express.static('./build/'));
-    // Any invalid calls for templateUrls are under app/* and should return 404
-    app.use('/app/*', function(req, res, next) {
-      four0four.send404(req, res);
-    });
-    // Any deep link calls should return index.html
-    app.use('/*', express.static('./build/index.html'));
+  case "production":
     break;
   default:
-    console.log('** DEV **');
-    app.use(express.static('./src/client/'));
-    app.use(express.static('./'));
-    app.use(express.static('./tmp'));
-    app.use('/docs', express.static('.src/client/docs/'));
-    // Any invalid calls for templateUrls are under app/* and should return 404
-    app.use('/app/*', function(req, res, next) {
-      four0four.send404(req, res);
-    });
+    console.log("** DEV **");
+    app.use(serve("./src/client/"));
+    app.use(serve("./"));
+    // app.use("/docs", serve("./src/client/docs/"));
     // Any deep link calls should return index.html
-    app.use('/*', express.static('./src/client/index.html'));
+    // app.use("/*", serve("./src/client/index.html"));
     break;
 }
 
 app.listen(port, function() {
-  console.log('Express server listening on port ' + port);
-  console.log('env = ' + app.get('env') +
-    '\n__dirname = ' + __dirname +
-    '\nprocess.cwd = ' + process.cwd());
+  console.log(`Express server listening on port ${port}`);
+  console.log(`env = ${app.env}` +
+    `\n__dirname = ${__dirname}` +
+    `\nprocess.cwd = ${process.cwd()}`);
 });

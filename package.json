@@ -18,9 +18,9 @@
   },
   "homepage": "https://github.com/jfeigel/angular-barebones",
   "dependencies": {
-    "body-parser": "^1.8.2",
-    "express": "^4.9.3",
-    "morgan": "^1.1.1",
+    "koa": "^1.2.0",
+    "koa-bodyparser": "^2.1.0",
+    "koa-static-folder": "^0.1.6",
     "serve-favicon": "^2.0.1"
   },
   "devDependencies": {
